@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+  <script type="text/javascript">
+    function refresh() {
+      var req = new XMLHttpRequest();
+      console.log("Getting Connection Status");
+      req.onreadystatechange = function () {
+        if (req.readyState == 4 && req.status == 200) {
+          var text_box = document.getElementById('status');
+		  console.log(req.responseText);
+		  if (req.responseText == "1") {
+			text_box.style.backgroundColor = "#4CAF50";
+			text_box.innerText = "Device Connected";
+		  }
+        }
+      }
+      req.open("POST", 'connection-check', true);
+      req.send(null);
+    }
+	
+	function init() {
+      refresh()
+      var int = self.setInterval(function () {
+        refresh()
+      }, 1000);
+    }
+  </script>
+</head>
+
+<style>
+	body {
+		background-color: rgb(31, 54, 123);
+	}
+	
+	.title {
+		color: rgb(255, 255, 255);
+	}
+
+	p {
+		background-color: #FF5722; //#4CAF50
+		border:           1px solid green;
+		color:            white;
+		padding:          10px 24px;
+		cursor:           pointer;
+		width:            50%;
+		display:          block;
+		margin:           auto;
+	}
+</style>
+
+<body onload="init()">
+	
+	<h1 class="title" align="center">Checking Connection...</h1><br>
+	<p align="center" id="status">Please Wait</p><br>
+	
+</body>
+</html>

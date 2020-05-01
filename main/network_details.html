@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+  <script type="text/javascript">
+    function init() {
+      var req = new XMLHttpRequest();
+      console.log("Getting Chosen SSID");
+      req.onreadystatechange = function () {
+        if (req.readyState == 4 && req.status == 200) {
+          var text_box = document.getElementById('chosen_ssid');
+		  
+		  text_box.innerText = req.responseText;
+        }
+      }
+      req.open("POST", 'network-details', true);
+      req.send("chosen-ap");
+    }
+  </script>
+</head>
+
+<style>
+	body {
+		background-color: rgb(31, 54, 123);
+	}
+	
+	.title {
+		color: rgb(255, 255, 255);
+	}
+
+	.btn-group p {
+		background-color: #4CAF50;
+		border:           1px solid green;
+		color:            white;
+		padding:          10px 24px;
+		width:            50%;
+		display:          block;
+		margin:           auto;
+	}
+</style>
+
+<body onload="init()">
+	
+	<h1 class="title" align="center">Enter WiFi AP Password</h1>
+	<form class="btn-group" method="post">
+		<p align="center" id="chosen_ssid"></p><br>
+		<div class="buttonHolder" align="center">
+			<input align="center" type="password" name="password" placeholder="Enter Password"><br><br>
+			<input align="center" value="Confirm" type="submit">
+		</div>
+	</form>
+	
+</body>
+</html>

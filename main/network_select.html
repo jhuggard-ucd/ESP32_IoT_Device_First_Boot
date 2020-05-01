@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+  <script type="text/javascript">
+    function init() {
+      var req = new XMLHttpRequest();
+      console.log("Getting Network Names");
+      req.onreadystatechange = function () {
+        if (req.readyState == 4 && req.status == 200) {
+          var container = document.getElementById('network-list');
+		  
+		  // Clear previous contents of the container
+		  while (container.hasChildNodes()) {
+			container.removeChild(container.lastChild);
+		  }
+		  
+		  var available_networks = req.responseText.split(',');
+		  
+		  for (i=0; i < available_networks.length; i+=2) {
+			var new_button = document.createElement("button");
+			new_button.align="center";
+			new_button.name="AccessPoint";
+			new_button.type="submit";
+			new_button.value=available_networks[i];
+			new_button.innerText = available_networks[i+1];
+			container.appendChild(new_button);
+		  }
+        }
+      }
+      req.open("POST", '', true);
+      req.send("network-selection");
+    }
+  </script>
+</head>
+
+<style>
+	body {
+		background-color: rgb(31, 54, 123);
+	}
+	
+	.title {
+		color: rgb(255, 255, 255);
+	}
+
+	.btn-group button {
+		background-color: #4CAF50;
+		border:           1px solid green;
+		color:            white;
+		padding:          10px 24px;
+		cursor:           pointer;
+		width:            50%;
+		display:          block;
+		margin:           auto;
+	}
+	
+	/* Prevent double borders */
+	.btn-group button:not(:last-child) {
+		border-bottom:    none;
+	}
+	
+	/* Add background color on hover */
+	.btn-group button:hover {
+		color:            #3e8e41;
+	}
+</style>
+
+<body onload="init()">
+	
+	<h1 class="title" align="center">Choose a WiFi AP to connect to</h1>
+	<form class="btn-group" method="post" id="network-list">
+	
+	</form>
+	
+</body>
+</html>
