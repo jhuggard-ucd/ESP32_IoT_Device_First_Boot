@@ -355,3 +355,4 @@ static void captive_portal_task(void *pvParameters) {
 void captive_portal_init() {
 	xTaskCreate(captive_portal_task, (const char *)"captive_portal_task", 10000, NULL, 3, NULL);
 }
+

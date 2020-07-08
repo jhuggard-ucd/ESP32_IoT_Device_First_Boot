@@ -1,3 +1,11 @@
 idf_component_register(SRCS "iot_fb_main.c"
+							"captive_portal.c"
+							"example_secondary_app.c"
+							"first_boot.c"
+							"http.c"
+							"memory.c"
+							"server.c"
+							"thingspeak.c"
+							"wifi.c"
                     INCLUDE_DIRS "."
                     EMBED_FILES "network_select.html" "network_details.html" "connection_check.html")

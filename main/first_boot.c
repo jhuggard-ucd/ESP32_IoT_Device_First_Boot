@@ -10,7 +10,6 @@
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "memory.h"
 #include "first_boot.h"
 
 #define RESET_GPIO                 GPIO_NUM_39

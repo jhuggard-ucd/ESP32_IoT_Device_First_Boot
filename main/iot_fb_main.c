@@ -15,10 +15,11 @@
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+#include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <stdint.h>
+#include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/adc.h"
@@ -67,6 +68,31 @@ void app_main(void) {
 	state = INIT;
 
 	while(1) {
+
+//		printf("Hello.");
+//
+//		switch(state) {
+//
+//		case INIT:
+//			printf("INIT");
+//			init();
+//			break;
+//		case CONNECT_AS_STA:
+//			printf("CAS");
+//			break;
+//		case IDENTIFY_NET:
+//			break;
+//		case WAIT_FOR_DETAILS:
+//			break;
+//		case RESTART_DEVICE:
+//			break;
+//		case LAUNCH_APP:
+//			break;
+//		default:
+//			printf("No State");
+//
+//		}
+
 		switch(state) {
 		/* Gives option to erase ESP32 memory on boot.
 		 * If valid network details are stored from previous boot, attempt to connect.

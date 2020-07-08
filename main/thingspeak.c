@@ -15,7 +15,7 @@
 
 static const char* TAG = "ThingSpeak";
 
- */
+
 #define WEB_SERVER "api.thingspeak.com"
 
 #define THINGSPEAK_WRITE_API_KEY "DUMMY API KEY"
