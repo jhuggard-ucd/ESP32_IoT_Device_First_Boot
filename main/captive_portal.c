@@ -275,7 +275,7 @@ static void captive_portal_recv(struct sockaddr_in *premote_addr, char *pusrdata
 	// Response will be same as request with some added data
 	memcpy(reply, pusrdata, length);
 
-	ESP_ERROR_CHECK(get_dns_query_info(pusrdata, length, &query, 1));
+	ESP_ERROR_CHECK(get_dns_query_info(pusrdata, length, &query, 0));
 
 	// Build response header
 	response_header = query.header;

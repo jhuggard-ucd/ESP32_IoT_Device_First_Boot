@@ -46,6 +46,8 @@
 
 #include "example_secondary_app.h"
 
+#define FIRST_BOOT_NAMESPACE "first_boot"
+
 /* Program runs as a state machine with the below functions */
 typedef enum {
 	INIT = 0,
@@ -69,30 +71,6 @@ void app_main(void) {
 
 	while(1) {
 
-//		printf("Hello.");
-//
-//		switch(state) {
-//
-//		case INIT:
-//			printf("INIT");
-//			init();
-//			break;
-//		case CONNECT_AS_STA:
-//			printf("CAS");
-//			break;
-//		case IDENTIFY_NET:
-//			break;
-//		case WAIT_FOR_DETAILS:
-//			break;
-//		case RESTART_DEVICE:
-//			break;
-//		case LAUNCH_APP:
-//			break;
-//		default:
-//			printf("No State");
-//
-//		}
-
 		switch(state) {
 		/* Gives option to erase ESP32 memory on boot.
 		 * If valid network details are stored from previous boot, attempt to connect.
@@ -100,6 +78,7 @@ void app_main(void) {
 		case	INIT:
 			ESP_LOGI("STATE", "INIT");
 			init();
+			init_memory(FIRST_BOOT_NAMESPACE);
 			if ( valid_network_details_stored(true) == true) {
 				state = CONNECT_AS_STA;
 			} else {
@@ -141,6 +120,7 @@ void app_main(void) {
 			 * error and the ESP32 will restart. */
 		case	LAUNCH_APP:
 			ESP_LOGI("STATE", "LAUNCH_APP");
+			deinit_memory();
 			(*pt2secondaryAPP)();
 			// should never get here!
 			esp_restart();

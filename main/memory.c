@@ -16,6 +16,8 @@ nvs_handle_t MEMORY_HANDLE;
 esp_err_t init_memory(char *namespace) {
 	//ESP_ERROR_CHECK(nvs_flash_erase());
 
+	ESP_LOGI("INIT MEMORY", "Memory initialised");
+
 	esp_err_t ret = nvs_flash_init();
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
@@ -32,7 +34,7 @@ esp_err_t init_memory(char *namespace) {
 
 esp_err_t deinit_memory() {
 	nvs_close(MEMORY_HANDLE);
-
+	ESP_LOGI("INIT MEMORY", "Memory deinitialised");
 	return ESP_OK;
 }
 

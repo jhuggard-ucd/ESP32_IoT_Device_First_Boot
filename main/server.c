@@ -134,7 +134,7 @@ esp_err_t network_selection_post_handler(httpd_req_t *req) {
 		sprintf(ssid, "%s", (char *)get_ap_details(chosenAP).ssid);
 
 		write_string("ssid_handle", ssid);
-		ESP_LOGI("debug", "Saved SSID");
+		ESP_LOGI("debug", "Saved SSID: %s", ssid);
 
 		// AUTHMODE
 		int authmode = get_ap_details(chosenAP).authmode;
