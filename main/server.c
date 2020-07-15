@@ -45,23 +45,62 @@ esp_err_t _http_event_handle(esp_http_client_event_t *evt)
 	return ESP_OK;
 }
 
-/* Our URI handler function to be called during GET /uri request */
-esp_err_t network_selection_get_handler(httpd_req_t *req) {
-	ESP_LOGI("Get Handler", "Entered get handler");
-	/* Get handle to embedded file upload script */
-	extern const unsigned char network_select_start[] asm("_binary_network_select_html_start");
-	extern const unsigned char network_select_end[]   asm("_binary_network_select_html_end");
-	const size_t network_select_size = (network_select_end - network_select_start);
+esp_err_t get_handler(httpd_req_t *req) {
 
-	/* Add file upload form and script which on execution sends a POST request to /upload */
-	httpd_resp_send_chunk(req, (const char *)network_select_start, network_select_size);
-	httpd_resp_send_chunk(req, "", 0);
-	ESP_LOGI("Get Handler", "Sent Response");
+	ESP_LOGI("Get Handler", "Entered get handler with URI: %s", req->uri);
+
+	//	if (strstr(req->uri, "/network-selection") == &req->uri[0]) {
+	//		printf("Looking for network selection");
+	//		httpd_resp_send(req, (const char *)network_select_start, network_select_size);
+	//		ESP_LOGI("Get Handler", "Sent Response");
+	//	} else
+	if (strstr(req->uri, "/network-details") == &req->uri[0]) {
+		ESP_LOGI("Get Handler", "Looking for network details");
+
+		/* Get handle to embedded html */
+		extern const unsigned char network_details_start[] asm("_binary_network_details_html_start");
+		extern const unsigned char network_details_end[]   asm("_binary_network_details_html_end");
+		const size_t network_details_size = (network_details_end - network_details_start);
+
+		/* Send html page */
+		httpd_resp_send(req, (const char *)network_details_start, network_details_size);
+		ESP_LOGI("Get Handler", "Sent Details Page");
+	} else if (strstr(req->uri, "/connection-check") == &req->uri[0]) {
+		ESP_LOGI("Get Handler", "Looking to check connection");
+
+		/* Get handle to embedded html */
+		extern const unsigned char connection_check_start[] asm("_binary_connection_check_html_start");
+		extern const unsigned char connection_check_end[]   asm("_binary_connection_check_html_end");
+		const size_t connection_check_size = (connection_check_end - connection_check_start);
+
+		/* Send html page */
+		httpd_resp_send(req, (const char *)connection_check_start, connection_check_size);
+		ESP_LOGI("Get Handler", "Sent Connection Check Page");
+	} else {
+		ESP_LOGI("Get Handler", "Looking to select network");
+
+		//TODO: Is it possible to redirect request to network-selection?
+		//		printf("Redirecting to network selection\n");
+		//		httpd_resp_set_status(req, "302 Found");
+		//		httpd_resp_set_hdr(req, "Location", "/network-selection");
+		//		httpd_resp_send(req, NULL, 0);  // Response body can be empty
+
+		/* Get handle to embedded html */
+		extern const unsigned char network_select_start[] asm("_binary_network_select_html_start");
+		extern const unsigned char network_select_end[]   asm("_binary_network_select_html_end");
+		const size_t network_select_size = (network_select_end - network_select_start);
+
+		/* Send html page */
+		httpd_resp_send(req, (const char *)network_select_start, network_select_size);
+		ESP_LOGI("Get Handler", "Sent Network Selection Page");
+	}
+
 	return ESP_OK;
 }
 
-esp_err_t network_selection_post_handler(httpd_req_t *req) {
-	ESP_LOGI("Post Handler", "Entered Network Selection Post Handler");
+esp_err_t post_handler(httpd_req_t *req) {
+
+	ESP_LOGI("Post Handler", "Entered Post Handler");
 
 	/* Destination buffer for content of HTTP POST request.
 	 * httpd_req_recv() accepts char* only, but content could
@@ -89,8 +128,8 @@ esp_err_t network_selection_post_handler(httpd_req_t *req) {
 	}
 
 	content[req->content_len] = '\0';
-	ESP_LOGI("debug", "Received info: %s", content);
 
+	/* Check if on network selection page */
 	if (strstr(content, "network-selection") == &content[0]) {
 		int apCount = get_ap_count();
 		if (apCount == 0) {
@@ -119,12 +158,10 @@ esp_err_t network_selection_post_handler(httpd_req_t *req) {
 		httpd_resp_send_chunk(req, "", 0);
 		ESP_LOGI("Post Handler", "Sent Response");
 		return ESP_OK;
-	}
 
-	/*
-	 * Check For Access Point Name
-	 */
-	if (strstr(content, "AccessPoint") == &content[0]) {
+	}
+	/* Check if AP selected */
+	else if (strstr(content, "AccessPoint") == &content[0]) {
 		int chosenAP;
 		sscanf(content, "AccessPoint=AP%d", &chosenAP);
 
@@ -156,56 +193,8 @@ esp_err_t network_selection_post_handler(httpd_req_t *req) {
 
 		return ESP_OK;
 	}
-	return ESP_OK;
-}
-
-/* Our URI handler function to be called during GET /uri request */
-esp_err_t network_details_get_handler(httpd_req_t *req) {
-	ESP_LOGI("Get Handler", "Entered get handler");
-	/* Get handle to embedded file upload script */
-	extern const unsigned char network_details_start[] asm("_binary_network_details_html_start");
-	extern const unsigned char network_details_end[]   asm("_binary_network_details_html_end");
-	const size_t network_details_size = (network_details_end - network_details_start);
-
-	/* Add file upload form and script which on execution sends a POST request to /upload */
-	httpd_resp_send_chunk(req, (const char *)network_details_start, network_details_size);
-	httpd_resp_send_chunk(req, "", 0);
-	ESP_LOGI("Get Handler", "Sent Response");
-	return ESP_OK;
-}
-
-esp_err_t network_details_post_handler(httpd_req_t *req) {
-	ESP_LOGI("Post Handler", "Entered Network Details Post Handler");
-
-	/* Destination buffer for content of HTTP POST request.
-	 * httpd_req_recv() accepts char* only, but content could
-	 * as well be any binary data (needs type casting).
-	 * In case of string data, null termination will be absent, and
-	 * content length would give length of string */
-	char content[1000];
-
-	/* Truncate if content length larger than the buffer */
-	size_t recv_size = fmin(req->content_len, sizeof(content));
-	ESP_LOGI("Debug", "%d", req->content_len);
-
-	int ret = httpd_req_recv(req, content, recv_size);
-	if (ret <= 0) { /* 0 return value indicates connection closed */
-		/* Check if timeout occurred */
-		if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
-			/* In case of timeout one can choose to retry calling
-			 * httpd_req_recv(), but to keep it simple, here we
-			 * respond with an HTTP 408 (Request Timeout) error */
-			httpd_resp_send_408(req);
-		}
-		/* In case of error, returning ESP_FAIL will
-		 * ensure that the underlying socket is closed */
-		return ESP_FAIL;
-	}
-
-	content[req->content_len] = '\0';
-	ESP_LOGI("debug", "Received info: %s", content);
-
-	if (strstr(content, "chosen-ap") == &content[0]) {
+	/* Check request for chosen AP */
+	else if (strstr(content, "chosen-ap") == &content[0]) {
 		// Read NVS
 		size_t ssid_size = SSID_SIZE;
 		char ssid[SSID_SIZE];
@@ -217,11 +206,8 @@ esp_err_t network_details_post_handler(httpd_req_t *req) {
 		ESP_LOGI("Post Handler", "Sent Response");
 		return ESP_OK;
 	}
-
-	/*
-	 * Check For Password
-	 */
-	if (strstr(content, "password") == &content[0]) {
+	/* Check if password entered */
+	else if (strstr(content, "password") == &content[0]) {
 		char pword[req->content_len];
 		sscanf(content, "password=%s", pword);
 		pword[req->content_len] = '\0';
@@ -235,33 +221,13 @@ esp_err_t network_details_post_handler(httpd_req_t *req) {
 
 		return ESP_OK;
 	}
-	return ESP_OK;
-}
-
-/* Our URI handler function to be called during GET /uri request */
-esp_err_t connection_check_get_handler(httpd_req_t *req) {
-	ESP_LOGI("Get Handler", "Entered get handler");
-	/* Get handle to embedded file upload script */
-	extern const unsigned char connection_check_start[] asm("_binary_connection_check_html_start");
-	extern const unsigned char connection_check_end[]   asm("_binary_connection_check_html_end");
-	const size_t connection_check_size = (connection_check_end - connection_check_start);
-
-	/* Add file upload form and script which on execution sends a POST request to /upload */
-	httpd_resp_send_chunk(req, (const char *)connection_check_start, connection_check_size);
-	httpd_resp_send_chunk(req, "", 0);
-	ESP_LOGI("Get Handler", "Sent Response");
-	return ESP_OK;
-}
-
-/* Our URI handler function to be called during GET /uri request */
-esp_err_t connection_check_post_handler(httpd_req_t *req) {
-	ESP_LOGI("Post Handler", "Entered post handler");
-
-
-	/* Add file upload form and script which on execution sends a POST request to /upload */
-	httpd_resp_sendstr(req, is_sta_connected() ? "1" : "0");
-	ESP_LOGI("Post Handler", "Sent Response");
-	return ESP_OK;
+	/* Otherwise, connection check */
+	else {
+		/* Add file upload form and script which on execution sends a POST request to /upload */
+		httpd_resp_sendstr(req, is_sta_connected() ? "1" : "0");
+		ESP_LOGI("Post Handler", "Sent Response");
+		return ESP_OK;
+	}
 }
 
 /* Function for starting the webserver */
@@ -287,9 +253,9 @@ httpd_handle_t start_webserver(void) {
 
 	/* URI handler for getting first page */
 	httpd_uri_t get_network_selection = {
-			.uri       = "/",  // Match all URIs
+			.uri       = "/*",  // Match all URIs
 			.method    = HTTP_GET,
-			.handler   = network_selection_get_handler,
+			.handler   = get_handler,
 			.user_ctx  = NULL
 	};
 	httpd_register_uri_handler(server, &get_network_selection);
@@ -297,51 +263,13 @@ httpd_handle_t start_webserver(void) {
 
 	/* URI handler for network selection */
 	httpd_uri_t post_network_selection = {
-			.uri       = "/",   // Match all URIs of type /upload/path/to/file /network-selection
+			.uri       = "/*",   // Match all URIs of type /upload/path/to/file /network-selection
 			.method    = HTTP_POST,
-			.handler   = network_selection_post_handler,
+			.handler   = post_handler,
 			.user_ctx  = NULL    // Pass server data as context
 	};
 	httpd_register_uri_handler(server, &post_network_selection);
-	ESP_LOGI("Start Webserver", "Registered network select post handler");
-
-	/* URI handler for getting network details page */
-	httpd_uri_t get_network_details = {
-			.uri       = "/network-details",  // Match all URIs
-			.method    = HTTP_GET,
-			.handler   = network_details_get_handler,
-			.user_ctx  = NULL
-	};
-	httpd_register_uri_handler(server, &get_network_details);
-	ESP_LOGI("Start Webserver", "Registered get handler");
-
-	/* URI handler for network details */
-	httpd_uri_t post_network_details = {
-			.uri       = "/network-details",   // Match all URIs of type /upload/path/to/file
-			.method    = HTTP_POST,
-			.handler   = network_details_post_handler,
-			.user_ctx  = NULL    // Pass server data as context
-	};
-	httpd_register_uri_handler(server, &post_network_details);
-
-	/* URI handler for getting connection check page */
-	httpd_uri_t get_connection_check = {
-			.uri       = "/connection-check",  // Match all URIs
-			.method    = HTTP_GET,
-			.handler   = connection_check_get_handler,
-			.user_ctx  = NULL
-	};
-	httpd_register_uri_handler(server, &get_connection_check);
-	ESP_LOGI("Start Webserver", "Registered get handler");
-
-	/* URI handler for checking connection */
-	httpd_uri_t post_connection_check = {
-			.uri       = "/connection-check",   // Match all URIs of type /upload/path/to/file
-			.method    = HTTP_POST,
-			.handler   = connection_check_post_handler,
-			.user_ctx  = NULL    // Pass server data as context
-	};
-	httpd_register_uri_handler(server, &post_connection_check);
+	ESP_LOGI("Start Webserver", "Registered post handler");
 
 	return server;
 }

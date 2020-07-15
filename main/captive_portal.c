@@ -92,16 +92,16 @@ esp_err_t get_dns_query_info(char* data, unsigned short length, DnsQuery *query,
 	query->header.nscount = (int)p[8]*256 + (int)p[9];
 	query->header.arcount = (int)p[10]*256 + (int)p[11];
 
-	if(verbose) {
-		printf("--------HEADER--------\n");
-		printf("ID:      %hu\n", query->header.id);
-		printf("FLAGS:   %d \n", query->header.flags);
-		printf("RCODE:   %d \n", query->header.rcode);
-		printf("QDCOUNT: %hu\n", query->header.qdcount);
-		printf("ANCOUNT: %hu\n", query->header.ancount);
-		printf("NSCOUNT: %hu\n", query->header.nscount);
-		printf("ARCOUNT: %hu\n", query->header.arcount);
-	}
+//	if(verbose) {
+//		printf("--------HEADER--------\n");
+//		printf("ID:      %hu\n", query->header.id);
+//		printf("FLAGS:   %d \n", query->header.flags);
+//		printf("RCODE:   %d \n", query->header.rcode);
+//		printf("QDCOUNT: %hu\n", query->header.qdcount);
+//		printf("ANCOUNT: %hu\n", query->header.ancount);
+//		printf("NSCOUNT: %hu\n", query->header.nscount);
+//		printf("ARCOUNT: %hu\n", query->header.arcount);
+//	}
 
 	if (query->header.ancount || query->header.nscount || query->header.arcount) {
 		printf("This is a reply...");
@@ -112,7 +112,7 @@ esp_err_t get_dns_query_info(char* data, unsigned short length, DnsQuery *query,
 		return ESP_FAIL;
 	}
 
-	if(verbose) printf("--------BODY--------\n");
+//	if(verbose) printf("--------BODY--------\n");
 	p = &p[12];
 
 	while(p[0] != 0) {
@@ -132,11 +132,11 @@ esp_err_t get_dns_query_info(char* data, unsigned short length, DnsQuery *query,
 	query->footer.type = (int)p[0]*256 + (int)p[1];
 	query->footer.class = (int)p[2]*256 + (int)p[3];
 
-	if(verbose) {
-		printf("--------FOOTER--------\n");
-		printf("QTYPE:   %hu\n", query->footer.type);
-		printf("QCLASS:  %hu\n", query->footer.class);
-	}
+//	if(verbose) {
+//		printf("--------FOOTER--------\n");
+//		printf("QTYPE:   %hu\n", query->footer.type);
+//		printf("QCLASS:  %hu\n", query->footer.class);
+//	}
 
 	return ESP_OK;
 
@@ -238,11 +238,11 @@ int alter_query_to_reply(DnsHeader *header, DnsResponseFooter *footer, uint8_t *
 	memcpy(footer_ptr, rdata, 4);
 	footer_ptr += 4;
 
-	printf("Response Data:\n");
-
-	for (int i = 0; i < footer_ptr-reply; i++) {
-		printf("%d: %d \n", i, reply[i]);
-	}
+//	printf("Response Data:\n");
+//
+//	for (int i = 0; i < footer_ptr-reply; i++) {
+//		printf("%d: %d \n", i, reply[i]);
+//	}
 
 	return footer_ptr-reply;
 }
@@ -275,7 +275,7 @@ static void captive_portal_recv(struct sockaddr_in *premote_addr, char *pusrdata
 	// Response will be same as request with some added data
 	memcpy(reply, pusrdata, length);
 
-	ESP_ERROR_CHECK(get_dns_query_info(pusrdata, length, &query, 0));
+	ESP_ERROR_CHECK(get_dns_query_info(pusrdata, length, &query, 1));
 
 	// Build response header
 	response_header = query.header;

@@ -121,6 +121,7 @@ void app_main(void) {
 		case	LAUNCH_APP:
 			ESP_LOGI("STATE", "LAUNCH_APP");
 			deinit_memory();
+
 			(*pt2secondaryAPP)();
 			// should never get here!
 			esp_restart();
