@@ -31,6 +31,7 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "first_boot.h"
 #include "memory.h"
 #include "wifi.h"
 
@@ -49,5 +50,9 @@ httpd_handle_t start_webserver(void);
  */
 void stop_webserver(httpd_handle_t server);
 
+/**
+ * @breif Returns whether user has been informed of positive connection
+ */
+int get_user_informed();
 
 #endif /* MAIN_SERVER_H_ */

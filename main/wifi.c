@@ -345,3 +345,7 @@ uint32_t get_ap_ip_address() {
 
 	return ip_info.ip.addr;
 }
+
+int get_connection_status() {
+	return connected;
+}

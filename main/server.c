@@ -12,6 +12,8 @@
 
 #include "server.h"
 
+int USER_INFORMED;
+
 esp_err_t _http_event_handle(esp_http_client_event_t *evt)
 {
 	switch(evt->event_id) {
@@ -47,16 +49,8 @@ esp_err_t _http_event_handle(esp_http_client_event_t *evt)
 
 esp_err_t get_handler(httpd_req_t *req) {
 
-	ESP_LOGI("Get Handler", "Entered get handler with URI: %s", req->uri);
 
-	//	if (strstr(req->uri, "/network-selection") == &req->uri[0]) {
-	//		printf("Looking for network selection");
-	//		httpd_resp_send(req, (const char *)network_select_start, network_select_size);
-	//		ESP_LOGI("Get Handler", "Sent Response");
-	//	} else
 	if (strstr(req->uri, "/network-details") == &req->uri[0]) {
-		ESP_LOGI("Get Handler", "Looking for network details");
-
 		/* Get handle to embedded html */
 		extern const unsigned char network_details_start[] asm("_binary_network_details_html_start");
 		extern const unsigned char network_details_end[]   asm("_binary_network_details_html_end");
@@ -64,10 +58,7 @@ esp_err_t get_handler(httpd_req_t *req) {
 
 		/* Send html page */
 		httpd_resp_send(req, (const char *)network_details_start, network_details_size);
-		ESP_LOGI("Get Handler", "Sent Details Page");
 	} else if (strstr(req->uri, "/connection-check") == &req->uri[0]) {
-		ESP_LOGI("Get Handler", "Looking to check connection");
-
 		/* Get handle to embedded html */
 		extern const unsigned char connection_check_start[] asm("_binary_connection_check_html_start");
 		extern const unsigned char connection_check_end[]   asm("_binary_connection_check_html_end");
@@ -75,15 +66,9 @@ esp_err_t get_handler(httpd_req_t *req) {
 
 		/* Send html page */
 		httpd_resp_send(req, (const char *)connection_check_start, connection_check_size);
-		ESP_LOGI("Get Handler", "Sent Connection Check Page");
 	} else {
-		ESP_LOGI("Get Handler", "Looking to select network");
 
 		//TODO: Is it possible to redirect request to network-selection?
-		//		printf("Redirecting to network selection\n");
-		//		httpd_resp_set_status(req, "302 Found");
-		//		httpd_resp_set_hdr(req, "Location", "/network-selection");
-		//		httpd_resp_send(req, NULL, 0);  // Response body can be empty
 
 		/* Get handle to embedded html */
 		extern const unsigned char network_select_start[] asm("_binary_network_select_html_start");
@@ -92,15 +77,12 @@ esp_err_t get_handler(httpd_req_t *req) {
 
 		/* Send html page */
 		httpd_resp_send(req, (const char *)network_select_start, network_select_size);
-		ESP_LOGI("Get Handler", "Sent Network Selection Page");
 	}
 
 	return ESP_OK;
 }
 
 esp_err_t post_handler(httpd_req_t *req) {
-
-	ESP_LOGI("Post Handler", "Entered Post Handler");
 
 	/* Destination buffer for content of HTTP POST request.
 	 * httpd_req_recv() accepts char* only, but content could
@@ -111,7 +93,6 @@ esp_err_t post_handler(httpd_req_t *req) {
 
 	/* Truncate if content length larger than the buffer */
 	size_t recv_size = fmin(req->content_len, sizeof(content));
-	ESP_LOGI("Debug", "%d", req->content_len);
 
 	int ret = httpd_req_recv(req, content, recv_size);
 	if (ret <= 0) { /* 0 return value indicates connection closed */
@@ -145,7 +126,6 @@ esp_err_t post_handler(httpd_req_t *req) {
 		for (int i = 0; i < apCount; i++) {
 			sprintf(key, "AP%d", i);
 			sprintf(ssid_string, "%s", (char *)get_ap_details(i).ssid);
-			ESP_LOGI("Post Handler", "Index: %d, SSID: %s, Length: %d", i, ssid_string, strlen(ssid_string));
 
 			httpd_resp_sendstr_chunk(req, key);
 			httpd_resp_sendstr_chunk(req, ",");
@@ -156,7 +136,6 @@ esp_err_t post_handler(httpd_req_t *req) {
 		}
 
 		httpd_resp_send_chunk(req, "", 0);
-		ESP_LOGI("Post Handler", "Sent Response");
 		return ESP_OK;
 
 	}
@@ -165,18 +144,14 @@ esp_err_t post_handler(httpd_req_t *req) {
 		int chosenAP;
 		sscanf(content, "AccessPoint=AP%d", &chosenAP);
 
-		ESP_LOGI("Post Handler", "Chose AP %d", chosenAP);
-
 		char ssid[33];
 		sprintf(ssid, "%s", (char *)get_ap_details(chosenAP).ssid);
 
 		write_string("ssid_handle", ssid);
-		ESP_LOGI("debug", "Saved SSID: %s", ssid);
 
 		// AUTHMODE
 		int authmode = get_ap_details(chosenAP).authmode;
 		if (authmode == WIFI_AUTH_OPEN) {
-			ESP_LOGI("Post Handler", "No password needed for open network");
 
 			write_string("pword_handle", "");
 
@@ -203,7 +178,6 @@ esp_err_t post_handler(httpd_req_t *req) {
 		httpd_resp_sendstr_chunk(req, ssid);
 
 		httpd_resp_send_chunk(req, "", 0);
-		ESP_LOGI("Post Handler", "Sent Response");
 		return ESP_OK;
 	}
 	/* Check if password entered */
@@ -211,7 +185,6 @@ esp_err_t post_handler(httpd_req_t *req) {
 		char pword[req->content_len];
 		sscanf(content, "password=%s", pword);
 		pword[req->content_len] = '\0';
-		ESP_LOGI("Post Handler", "Password Entered: %s", pword);
 
 		write_string("pword_handle", pword);
 
@@ -219,13 +192,20 @@ esp_err_t post_handler(httpd_req_t *req) {
 		httpd_resp_set_hdr(req, "Location", "/connection-check");
 		httpd_resp_send(req, NULL, 0);  // Response body can be empty
 
+		connect_to_saved_ap();
+
 		return ESP_OK;
 	}
 	/* Otherwise, connection check */
 	else {
 		/* Add file upload form and script which on execution sends a POST request to /upload */
-		httpd_resp_sendstr(req, is_sta_connected() ? "1" : "0");
-		ESP_LOGI("Post Handler", "Sent Response");
+		if (is_sta_connected() == 1) {
+			httpd_resp_sendstr(req, "1");
+			USER_INFORMED = 1;
+		} else {
+			httpd_resp_sendstr(req, "0");
+		}
+
 		return ESP_OK;
 	}
 }
@@ -235,12 +215,12 @@ httpd_handle_t start_webserver(void) {
 	/* Generate default configuration */
 	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
+	USER_INFORMED = 0;
+
 	/* Use the URI wildcard matching function in order to
 	 * allow the same handler to respond to multiple different
 	 * target URIs which match the wildcard scheme */
 	config.uri_match_fn = httpd_uri_match_wildcard;
-
-	ESP_LOGI("Start Webserver", "Set HTTP Config");
 
 	/* Empty handle to esp_http_server */
 	httpd_handle_t server = NULL;
@@ -259,7 +239,6 @@ httpd_handle_t start_webserver(void) {
 			.user_ctx  = NULL
 	};
 	httpd_register_uri_handler(server, &get_network_selection);
-	ESP_LOGI("Start Webserver", "Registered get handler");
 
 	/* URI handler for network selection */
 	httpd_uri_t post_network_selection = {
@@ -269,7 +248,6 @@ httpd_handle_t start_webserver(void) {
 			.user_ctx  = NULL    // Pass server data as context
 	};
 	httpd_register_uri_handler(server, &post_network_selection);
-	ESP_LOGI("Start Webserver", "Registered post handler");
 
 	return server;
 }
@@ -280,6 +258,10 @@ void stop_webserver(httpd_handle_t server) {
 		/* Stop the httpd server */
 		httpd_stop(server);
 	}
+}
+
+int get_user_informed() {
+	return USER_INFORMED;
 }
 
 

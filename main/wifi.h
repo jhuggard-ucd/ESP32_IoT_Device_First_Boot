@@ -105,4 +105,10 @@ esp_netif_t *get_sta_netif();
 
 uint32_t get_ap_ip_address();
 
+/**
+ * @brief Find if ESP32 is connected to an AP
+ * @return 1 if connected, 0 otherwise
+ */
+int get_connection_status();
+
 #endif /* MAIN_WIFI_H_ */

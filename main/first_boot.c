@@ -36,8 +36,6 @@ void init() {
 
 
 bool valid_network_details_stored(bool verbose) {
-	// Initialise NVS
-	//init_memory(FIRST_BOOT_NAMESPACE);
 
 	// Check NVS
 	size_t ssid_size = SSID_SIZE;
@@ -49,7 +47,6 @@ bool valid_network_details_stored(bool verbose) {
 	// Check if SSID and Password were obtained from NVS
 	if (ssid_err == ESP_OK && pword_err == ESP_OK) {
 		ESP_LOGI(VALID_NETWORK_DETAILS_STORED_TAG, "Valid SSID and Password exist");
-		//deinit_memory();
 		return true;
 	} else {
 		if (verbose) {
@@ -57,7 +54,6 @@ bool valid_network_details_stored(bool verbose) {
 			ESP_LOGE(VALID_NETWORK_DETAILS_STORED_TAG, "Error getting SSID:     %s", esp_err_to_name(ssid_err));
 			ESP_LOGE(VALID_NETWORK_DETAILS_STORED_TAG, "Error getting password: %s", esp_err_to_name(pword_err));
 		}
-		//deinit_memory();
 		return false;
 	}
 

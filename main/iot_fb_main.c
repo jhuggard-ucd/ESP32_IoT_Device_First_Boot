@@ -110,8 +110,8 @@ void app_main(void) {
 			/* Wait for user to input details of network to be connected to. */
 		case    WAIT_FOR_DETAILS:
 			ESP_LOGI("STATE", "WAIT_FOR_DETAILS");
-			while (valid_network_details_stored(false) == false) {
-				vTaskDelay(100/portTICK_PERIOD_MS);
+			while (get_user_informed() == 0) {
+				vTaskDelay(300/portTICK_PERIOD_MS);
 			}
 			state = RESTART_DEVICE;
 			break;
