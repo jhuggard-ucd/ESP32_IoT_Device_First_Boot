@@ -64,8 +64,6 @@ bool valid_network_details_stored(bool verbose) {
 }
 
 esp_err_t connect_to_saved_ap() {
-	// Initialise NVS
-	//init_memory(FIRST_BOOT_NAMESPACE);
 
 	// Read NVS
 	size_t ssid_size = SSID_SIZE;
@@ -76,18 +74,13 @@ esp_err_t connect_to_saved_ap() {
 	char pword[PWORD_SIZE];
 	read_string(PWORD_HANDLE, pword, &pword_size);
 
-	//deinit_memory();
-
 	if (connect_to_ap(ssid, pword) == ESP_OK) {
+		ESP_LOGI("connect_to_saved_ap", "Connection to saved AP successful");
 		return ESP_OK;
 	} else {
 		ESP_LOGE("connect_to_saved_ap", "Could not connect to saved AP");
 		return ESP_FAIL;
 	}
-}
-
-void clear_stored_network_details() {
-	nvs_flash_erase_partition(FIRST_BOOT_NAMESPACE);
 }
 
 void identifty_network() {
@@ -105,16 +98,12 @@ void identifty_network() {
 			// Scan for nearby APs
 			scan_aps();
 
-			// Disable wifi station
-			//			disable_wifi();
-
 			state = SETUP_APSTA;
 
 			break;
 		case	SETUP_APSTA:
 			// Set ESP32 up as APSTA
 			ap_sta_setup();
-			//init_memory(FIRST_BOOT_NAMESPACE);
 
 			state = IDENTIFY_NETWORK;
 			break;

@@ -92,6 +92,9 @@ esp_err_t read_uint8(char *key, uint8_t *value);
  */
 esp_err_t write_uint8(char *key, uint8_t value);
 
-
+/**
+ * @brief Clear memory in a specified namespace
+ */
+void clear_namespace();
 
 #endif /* MAIN_MEMORY_H_ */

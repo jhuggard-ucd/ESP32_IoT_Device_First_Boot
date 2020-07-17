@@ -24,10 +24,8 @@ esp_err_t init_memory(char *namespace) {
 		ret = nvs_flash_init();
 	}
 	ESP_ERROR_CHECK(ret);
-	//ESP_LOGI("Initialise NVS", "Complete");
 
 	ESP_ERROR_CHECK(nvs_open(namespace, NVS_READWRITE, &MEMORY_HANDLE));
-	//ESP_LOGI("Open First Boot Namespace", "Complete");
 
 	return ESP_OK;
 }
@@ -116,4 +114,9 @@ esp_err_t write_uint8(char *key, uint8_t value) {
 	else ESP_LOGI("write_uint8", "Wrote value for %s: %d", key, value);
 
 	return err;
+}
+
+void clear_namespace() {
+	esp_err_t err = nvs_erase_all(MEMORY_HANDLE);
+	ESP_LOGI("clear_namespace", "Partition erased with error code: %s", esp_err_to_name(err));
 }

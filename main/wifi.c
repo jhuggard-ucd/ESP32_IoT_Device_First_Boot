@@ -28,7 +28,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define AP_MODE_BIT        BIT3
 
 /* Number of unsuccessful reconnect attempts before stop */
-#define WIFI_MAXIMUM_RETRY 3
+#define WIFI_MAXIMUM_RETRY 1
 
 /* Temporary AP Details */
 #define ESP_WIFI_SSID      "ESP_WIFI"
@@ -111,9 +111,11 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
 		if (s_retry_num < WIFI_MAXIMUM_RETRY) {
 			esp_wifi_connect();
+			ESP_LOGI("Event Handler", "Retry to connect to the AP: attempt %d", s_retry_num);
 			s_retry_num++;
 			ESP_LOGI("Event Handler", "retry to connect to the AP");
 		} else {
+			ESP_LOGI("Event Handler", "Maximum retry reached. Fail bit set.");
 			xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
 			connected = 0;
 		}

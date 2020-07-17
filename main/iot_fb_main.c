@@ -93,9 +93,12 @@ void app_main(void) {
 				state = LAUNCH_APP;
 			}
 			else {
-				clear_stored_network_details();  // Clear incorrect network details
+				ESP_LOGE("Connection to STA", "Connection failed. Erasing stored network details.");
+				clear_namespace();  // Clear incorrect network details
 				state = IDENTIFY_NET;
+				break;
 			}
+			ESP_LOGI("Connection to STA", "Passed through 'if' statement");
 			break;
 			/* Run first boot application to identify network to connect.
 			 * Waits in loop, checking every 100ms if network has been selected. */

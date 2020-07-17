@@ -46,11 +46,6 @@ bool valid_network_details_stored(bool verbose);
 esp_err_t connect_to_saved_ap();
 
 /**
- * @brief Clear NVS partition with saved network details
- */
-void clear_stored_network_details();
-
-/**
  * @brief Allow for user to select network to connect to
  */
 void identifty_network();
