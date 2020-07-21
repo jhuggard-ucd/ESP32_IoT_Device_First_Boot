@@ -14,9 +14,16 @@
 			text_box.style.backgroundColor = "#4CAF50";
 			text_box.innerText = "Device Connected";
 		  } else {
-		  	text_box.style.backgroundCOlor = "red";
+		  	text_box.style.backgroundColor = "red";
 		  	text_box.innerText = "Failed to Connect. Redirecting...";
-		  	setTimeout(window.location.href = "/network-select", 3000);
+		  	
+		  	var button = document.createElement("input");
+		  	button.setAttribute("onclick", "redirect()");
+		  	button.setAttribute("value", "Return to network selection");
+		  	button.setAttribute("type", "submit");
+		  	button.setAttribute("align", "center");
+		  	text_box.parentNode.insertBefore(button, text_box.nextSibling);
+		  	
 		  }
         }
       }
@@ -24,12 +31,9 @@
       req.send('connection-check');
     }
 	
-	function init() {
-      refresh()
-      var int = self.setInterval(function () {
-        refresh()
-      }, 1000);
-    }
+	function redirect() {
+		window.location.href = "/network-select";
+	}
   </script>
 </head>
 
@@ -56,8 +60,10 @@
 
 <body onload="refresh()">
 	
-	<h1 class="title" align="center">Checking Connection...</h1><br>
-	<p align="center" id="status">Please Wait</p><br>
+	<h1 class="title" align="center">Checking Connection...</h1>
+	<div id="content" align="center">
+		<p align="center" id="status">Please Wait</p>
+	</div>
 	
 </body>
 </html>

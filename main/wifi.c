@@ -312,6 +312,10 @@ esp_err_t connect_to_ap(char *ssid, char *pword) {
 			pdFALSE,
 			pdFALSE,
 			portMAX_DELAY);
+
+	xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+	xEventGroupClearBits(s_wifi_event_group, WIFI_FAIL_BIT);
+
 	ESP_LOGI(CONNECT_TO_AP_TAG, "Connection or fail made");
 
 	if (is_sta_connected()) {
