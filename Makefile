@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := softAP
+PROJECT_NAME := ESP32_IoT_Device_First_Boot
 
 include $(IDF_PATH)/make/project.mk
 
