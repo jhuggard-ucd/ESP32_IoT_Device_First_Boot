@@ -117,16 +117,16 @@ esp_err_t get_dns_query_info(char* data, unsigned short length, DnsQuery *query,
 
 	while(p[0] != 0) {
 		len = (int) p++[0];
-		for (int i = 0; i < len; i++) {
-			if(verbose) printf("%c", p[i]);
-		}
+//		for (int i = 0; i < len; i++) {
+//			if(verbose) printf("%c", p[i]);
+//		}
 		p += len;
-		if(p[0] != 0 && verbose) {
-			printf(".");
-		}
+//		if(p[0] != 0 && verbose) {
+//			printf(".");
+//		}
 
 	}
-	if(verbose) printf("\n");
+//	if(verbose) printf("\n");
 	p++;
 
 	query->footer.type = (int)p[0]*256 + (int)p[1];
@@ -238,12 +238,6 @@ int alter_query_to_reply(DnsHeader *header, DnsResponseFooter *footer, uint8_t *
 	memcpy(footer_ptr, rdata, 4);
 	footer_ptr += 4;
 
-//	printf("Response Data:\n");
-//
-//	for (int i = 0; i < footer_ptr-reply; i++) {
-//		printf("%d: %d \n", i, reply[i]);
-//	}
-
 	return footer_ptr-reply;
 }
 
@@ -336,8 +330,6 @@ static void captive_portal_task(void *pvParameters) {
 			vTaskDelay(1000/portTICK_RATE_MS);
 		}
 	} while (ret!=0);
-
-	printf("Captive Portal Initiated.");
 
 	while (1) {
 		memset(&from, 0, sizeof(from));

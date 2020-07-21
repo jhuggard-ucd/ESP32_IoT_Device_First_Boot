@@ -2,6 +2,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf8" />
   <script type="text/javascript">
+  
     function refresh() {
       var req = new XMLHttpRequest();
       console.log("Getting Connection Status");
@@ -12,6 +13,10 @@
 		  if (req.responseText == "1") {
 			text_box.style.backgroundColor = "#4CAF50";
 			text_box.innerText = "Device Connected";
+		  } else {
+		  	text_box.style.backgroundCOlor = "red";
+		  	text_box.innerText = "Failed to Connect. Redirecting...";
+		  	setTimeout(window.location.href = "/network-select", 3000);
 		  }
         }
       }
@@ -49,7 +54,7 @@
 	}
 </style>
 
-<body onload="init()">
+<body onload="refresh()">
 	
 	<h1 class="title" align="center">Checking Connection...</h1><br>
 	<p align="center" id="status">Please Wait</p><br>

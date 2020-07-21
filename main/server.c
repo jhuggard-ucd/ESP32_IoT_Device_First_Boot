@@ -192,13 +192,12 @@ esp_err_t post_handler(httpd_req_t *req) {
 		httpd_resp_set_hdr(req, "Location", "/connection-check");
 		httpd_resp_send(req, NULL, 0);  // Response body can be empty
 
-		connect_to_saved_ap();
-
 		return ESP_OK;
 	}
 	/* Otherwise, connection check */
 	else {
 		/* Add file upload form and script which on execution sends a POST request to /upload */
+		connect_to_saved_ap();
 		if (is_sta_connected() == 1) {
 			httpd_resp_sendstr(req, "1");
 			USER_INFORMED = 1;
